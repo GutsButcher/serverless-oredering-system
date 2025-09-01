@@ -92,16 +92,6 @@ All infrastructure settings are in `terraform/variables.tf`. Default region is `
 
 Check Lambda logs in CloudWatch under `/aws/lambda/{function-name}`.
 
-## Cost
-
-Using serverless pricing model:
-- DynamoDB: Pay-per-request
-- Lambda: Pay per invocation
-- SQS: Pay per message
-- API Gateway: Pay per request
-
-Typical monthly cost for low-medium traffic: $5-20
-
 ## License
 
 MIT
