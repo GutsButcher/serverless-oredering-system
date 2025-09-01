@@ -1,26 +1,16 @@
 #!/bin/bash
 
-# Quick API test script
-
 set -e
 
 cd terraform
 
-echo "🧪 Testing Order API..."
-echo
-
-# Get API URL
-API_URL=$(terraform output -raw api_gateway_invoke_url)
+API_URL=$(terraform output -raw api_gateway_invoke_url 2>/dev/null)
 
 if [ -z "$API_URL" ]; then
-    echo "❌ No API URL found. Deploy first with ./deploy.sh"
+    echo "Error: No API URL found. Run ./deploy.sh first"
     exit 1
 fi
 
-echo "📮 Submitting test order to: $API_URL"
-echo
-
-# Submit order
 RESPONSE=$(curl -s -X POST "$API_URL" \
   -H "Content-Type: application/json" \
   -d '{
@@ -31,26 +21,14 @@ RESPONSE=$(curl -s -X POST "$API_URL" \
     ]
   }')
 
-echo "Response: $RESPONSE"
-echo
-
-# Extract order ID
 ORDER_ID=$(echo $RESPONSE | grep -o '"orderId":"[^"]*' | cut -d'"' -f4)
 
 if [ -z "$ORDER_ID" ]; then
-    echo "❌ Failed to create order"
+    echo "Error: Failed to create order"
+    echo "$RESPONSE"
     exit 1
 fi
 
-echo "✅ Order created: $ORDER_ID"
-echo
-
-# Check status
-echo "📊 Checking order status..."
 sleep 2
 
-STATUS_URL="${API_URL}/${ORDER_ID}"
-curl -s -X GET "$STATUS_URL" | python3 -m json.tool
-
-echo
-echo "✨ Test complete!"
+curl -s -X GET "${API_URL}/${ORDER_ID}" | python3 -m json.tool
